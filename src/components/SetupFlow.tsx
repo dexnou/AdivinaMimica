@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Player, Team, Category } from '../types';
 import { Button } from './Button';
-import { generateTeams, getCategories } from '../services/gameService';
+// CORRECCIÓN 1: Cambiamos getCategories por fetchCategories
+import { generateTeams, fetchCategories } from '../services/gameService';
 
 interface SetupFlowProps {
   onComplete: (teams: Team[], actorsPerTurn: number, category: Category) => void;
@@ -28,9 +29,17 @@ export const SetupFlow: React.FC<SetupFlowProps> = ({ onComplete, onBack }) => {
   const [newPlayerName, setNewPlayerName] = useState('');
   const [teams, setTeams] = useState<Team[]>([]);
   const [actorsCount, setActorsCount] = useState(1);
+  const [loading, setLoading] = useState(false); // Nuevo estado para feedback visual
 
+  // CORRECCIÓN 2: useEffect asíncrono para cargar datos de Supabase
   useEffect(() => {
-    setCategories(getCategories());
+    const loadData = async () => {
+      setLoading(true);
+      const data = await fetchCategories();
+      setCategories(data);
+      setLoading(false);
+    };
+    loadData();
   }, []);
 
   // --- Step 1: Category ---
@@ -82,7 +91,9 @@ export const SetupFlow: React.FC<SetupFlowProps> = ({ onComplete, onBack }) => {
       <div className="flex flex-col h-full">
         <div className="mb-6">
             <BackButton onClick={onBack} label="Inicio" />
-            <h2 className="text-3xl font-heading font-bold text-primary dark:text-indigo-400">Elige Categoría</h2>
+            <h2 className="text-3xl font-heading font-bold text-primary dark:text-indigo-400">
+              Elige Categoría {loading && <span className="text-sm font-normal text-gray-400">(Cargando...)</span>}
+            </h2>
             <p className="text-gray-400 text-sm">¿Sobre qué van a actuar hoy?</p>
         </div>
         <div className="grid grid-cols-1 gap-4 overflow-y-auto pb-10 custom-scrollbar pr-2">
@@ -99,6 +110,9 @@ export const SetupFlow: React.FC<SetupFlowProps> = ({ onComplete, onBack }) => {
               </p>
             </button>
           ))}
+          {!loading && categories.length === 0 && (
+            <p className="text-center text-gray-400">No se encontraron categorías. Revisa tu conexión.</p>
+          )}
         </div>
       </div>
     );
@@ -153,13 +167,11 @@ export const SetupFlow: React.FC<SetupFlowProps> = ({ onComplete, onBack }) => {
   }
 
   if (step === 3) {
-    
-    // Initial Team Count Selection View
     if (teams.length === 0) {
-      const maxPossibleTeams = players.length; // Can't have more teams than players
+      const maxPossibleTeams = players.length;
       return (
-        <div className="flex flex-col h-full justify-center space-y-8">
-           <div className="absolute top-4 left-4">
+        <div className="flex flex-col h-full justify-center space-y-8 relative">
+           <div className="absolute top-0 left-0">
                <BackButton onClick={() => setStep(2)} label="Jugadores" />
            </div>
            
@@ -179,7 +191,6 @@ export const SetupFlow: React.FC<SetupFlowProps> = ({ onComplete, onBack }) => {
       );
     }
 
-    // Rename View
     return (
         <div className="flex flex-col h-full">
             <div className="mb-4">
@@ -214,7 +225,6 @@ export const SetupFlow: React.FC<SetupFlowProps> = ({ onComplete, onBack }) => {
   }
 
   if (step === 4) {
-    // Determine max actors
     const minTeamSize = Math.min(...teams.map(t => t.players.length));
     const maxActors = Math.max(1, minTeamSize - 1);
     const options = [1, 2, 3].filter(n => n <= maxActors);

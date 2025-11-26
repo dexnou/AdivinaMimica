@@ -1,4 +1,3 @@
-
 export interface Player {
   id: string;
   name: string;
@@ -9,18 +8,18 @@ export interface Team {
   name: string;
   players: Player[];
   score: number;
-  nextActorIndex: number; // New: Tracks who is next in the rotation
+  nextActorIndex: number;
 }
 
-export interface Card {
-  id: string;
+export interface CardItem {
+  id: string | number; // Flexible para aceptar ambos
   text: string;
 }
 
 export interface Category {
-  id: string;
+  id: string | number; // Flexible para aceptar ambos
   name: string;
-  cards: string[]; // Stores raw text strings for cards
+  cards: CardItem[];
 }
 
 export enum GameStep {
@@ -35,8 +34,8 @@ export enum GameStep {
 }
 
 export enum TurnPhase {
-  STANDBY = 'STANDBY', // Showing who's turn it is
-  CARD_REVEAL = 'CARD_REVEAL', // Showing the card
-  TIMER = 'TIMER', // Timer running
-  SCORE_UPDATE = 'SCORE_UPDATE' // Intermediate screen to show score changes
+  STANDBY = 'STANDBY',
+  CARD_REVEAL = 'CARD_REVEAL',
+  TIMER = 'TIMER',
+  SCORE_UPDATE = 'SCORE_UPDATE'
 }

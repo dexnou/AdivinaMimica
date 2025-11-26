@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { GameStep, Team, Category } from './types';
-import { Button } from './components/Button';
-import { SetupFlow } from './components/SetupFlow';
-import { GameFlow } from './components/GameFlow';
-import { AdminPanel } from './components/AdminPanel';
+import { GameStep, Team, Category } from './src/types';
+import { Button } from './src/components/Button';
+import { SetupFlow } from './src/components/SetupFlow';
+import { GameFlow } from './src/components/GameFlow';
+import { AdminPanel } from './src/components/AdminPanel';
 
 const App: React.FC = () => {
   const [gameStep, setGameStep] = useState<GameStep>(GameStep.HOME);
